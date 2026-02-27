@@ -1,0 +1,72 @@
+# ============================================================
+# MODEL CONFIGURATION
+# Parameters for each model family.
+# Hyperparameter search overrides these defaults.
+# ============================================================
+
+# ── Shared data parameters ────────────────────────────────────
+data:
+  encoder_length:     60    # lookback window in trading days (~3 months)
+  prediction_length:  5     # forecast horizon (1 week)
+  targets:
+    - y_ret_1d
+    - y_ret_5d
+  val_start:  "2021-01-04"
+  test_start: "2023-01-03"
+
+# ── TFT ──────────────────────────────────────────────────────
+tft:
+  hidden_size:              64
+  hidden_continuous_size:   32
+  attention_head_size:       2
+  dropout:                 0.1
+  learning_rate:           0.0003
+  batch_size:               64
+  max_epochs:              100
+  patience:                 15   # early stopping
+  gradient_clip:            0.1
+
+# ── PatchTST ─────────────────────────────────────────────────
+patchtst:
+  d_model:         128
+  n_heads:           8
+  num_encoder_layers: 3
+  patch_length:     16
+  stride:            8
+  dropout:          0.1
+  learning_rate:   0.0001
+  batch_size:        64
+  max_epochs:       100
+  patience:          15
+
+# ── DLinear ──────────────────────────────────────────────────
+dlinear:
+  individual:       true   # separate linear layer per channel
+  learning_rate:  0.001
+  batch_size:       256
+  max_epochs:       100
+  patience:          15
+
+# ── N-BEATS ──────────────────────────────────────────────────
+nbeats:
+  num_stacks:         2
+  num_blocks:         3
+  num_layers:         4
+  layer_width:       256
+  expansion_coeff:    5
+  learning_rate:   0.001
+  batch_size:        128
+  max_epochs:        100
+  patience:           15
+
+# ── Ensemble ─────────────────────────────────────────────────
+ensemble:
+  method:   simple_average   # options: simple_average, rank_average, stacking
+  weights:
+    tft:       0.35
+    patchtst:  0.30
+    nbeats:    0.20
+    dlinear:   0.15
+
+# ── Reproducibility ──────────────────────────────────────────
+seed: 42

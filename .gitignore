@@ -1,0 +1,51 @@
+# ── Virtual environment ────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+
+# ── Data — never commit bulk data to git ──────────────
+# Raw and processed data stays local only
+data/raw/
+data/processed/
+data/features/
+data/master/
+data/audit/
+
+# These ARE committed — they hold metadata not bulk data
+!data/registry/
+!data/splits/
+!data/registry/.gitkeep
+!data/splits/.gitkeep
+
+# ── Model weights — too large for git ─────────────────
+models/**/*.ckpt
+models/**/*.pt
+models/**/*.pkl
+models/**/*.bin
+# But commit model configs and results summaries
+!models/**/*.yaml
+!models/**/*.json
+
+# ── Secrets ───────────────────────────────────────────
+.env
+*.env
+
+# ── Logs ──────────────────────────────────────────────
+logs/
+*.log
+
+# ── macOS ─────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+
+# ── Jupyter ───────────────────────────────────────────
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# ── Editor ────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp

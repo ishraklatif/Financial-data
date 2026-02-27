@@ -1,0 +1,166 @@
+# ============================================================
+# FEATURES CONFIGURATION
+# Defines what goes into the model input.
+# features_locked.json (generated at build time from train split)
+# is the runtime enforcement — this file is the human-readable spec.
+# ============================================================
+
+# ── Keys (never used as model inputs) ────────────────────────
+keys:
+  - date
+  - time_idx
+  - ticker
+  - sector_id
+
+# ── Targets ──────────────────────────────────────────────────
+# Both computed from close_adj only — never raw close
+targets:
+  primary:   y_ret_1d    # 1-day forward return  (shift -1)
+  secondary: y_ret_5d    # 5-day forward return  (shift -5)
+
+# Return validation gates (applied at compute time, not model time)
+target_gates:
+  min_return: -0.99      # below this → quarantine as NaN, not delete
+  max_return:  5.00      # above this → quarantine as NaN, not delete
+
+# ── Static categoricals (known, don't change over time) ──────
+static_categoricals:
+  - ticker
+  - sector_id
+
+# ── Known future reals (calendar — known in advance) ─────────
+known_future_reals:
+  - time_idx
+  - cal_day_of_week
+  - cal_week_of_year
+  - cal_month
+  - cal_quarter
+  - cal_is_month_end
+  - cal_is_quarter_end
+  - cal_is_year_end
+  - cal_is_aus_holiday
+  - cal_is_us_holiday
+  - cal_dist_to_aus_holiday
+  - cal_dist_to_us_holiday
+
+# ── Unknown reals (observed, not known in advance) ───────────
+unknown_reals:
+
+  # Company OHLCV (raw — used for feature computation, not direct inputs)
+  price:
+    - open
+    - high
+    - low
+    - close
+    - close_adj         # adjusted close — source for all return targets
+    - volume
+
+  # Technical indicators (computed from price)
+  technical:
+    - ta_rsi_14
+    - ta_rsi_28
+    - ta_macd
+    - ta_macd_signal
+    - ta_macd_hist
+    - ta_bb_upper
+    - ta_bb_lower
+    - ta_bb_width
+    - ta_atr_14
+    - ta_obv
+    - ta_adl
+    - ta_mfi_14
+    - ta_ema_21
+    - ta_ema_63
+    - ta_sma_200
+    - ta_hl_range
+    - ta_oc_range
+    - ta_dollar_vol
+    - ta_amihud_illiq
+    - ta_vol_z60         # volume z-score over 60 days
+    - ta_dollar_vol_z60  # dollar volume z-score
+
+  # Macro indices returns and volatility
+  macro:
+    - xa_axjo_ret1d
+    - xa_axjo_rv20
+    - xa_gspc_ret1d
+    - xa_gspc_rv20
+    - xa_n225_ret1d
+    - xa_hsi_ret1d
+    - xa_ftse_ret1d
+    - xa_vix_level
+    - xa_vix_z252
+    - xa_vvix_level
+    - xa_move_level
+
+  # FX and commodities
+  market:
+    - xa_audusd_ret1d
+    - xa_audusd_z60
+    - xa_audjpy_ret1d
+    - xa_dxy_ret1d
+    - xa_gold_ret1d
+    - xa_oil_ret1d
+    - xa_copper_ret1d
+    - xa_iron_ret1d      # iron ore — key for materials sector
+    - xa_bdi_ret1d       # Baltic Dry Index
+
+  # US rates and yield curve
+  rates:
+    - xa_dgs2_level
+    - xa_dgs10_level
+    - xa_dgs30_level
+    - xa_curve_10_2      # 10Y minus 2Y spread (recession indicator)
+    - xa_curve_30_3m     # 30Y minus 3M spread
+    - xa_hy_spread
+    - xa_ig_spread
+    - xa_fedfunds_level
+
+  # Australian macro
+  aus_macro:
+    - aus_cash_rate
+    - aus_yield_10y
+    - aus_yield_2y
+    - aus_credit_bus_growth
+    - aus_credit_hou_growth
+    - aus_cpi_yoy
+    - aus_unemp_rate
+    - aus_gdp_growth
+
+  # Regime features (computed from macro)
+  regime:
+    - reg_market_regime       # bull/bear/neutral: 0/1/2
+    - reg_macro_regime        # expansion/contraction: 0/1
+    - reg_vol_regime          # low/med/high vol: 0/1/2
+    - reg_market_score        # continuous regime score
+    - reg_macro_score
+    - reg_market_mask         # 1 if regime data available
+    - reg_macro_mask
+
+  # Sentiment
+  sentiment:
+    - sent_news_score         # FinBERT aggregated score
+    - sent_news_has_any       # binary: 1 if news exists for date
+    - sent_short_interest     # ASIC short % of float (weekly, ffilled)
+    - sent_short_change_1w    # weekly change in short interest
+
+# ── Feature availability (for features with limited history) ──
+availability:
+  xa_vvix_level:
+    start_date: "2007-01-03"
+  xa_iron_ret1d:
+    start_date: "2009-01-01"
+  aus_credit_bus_growth:
+    start_date: "2005-01-01"
+  sent_short_interest:
+    start_date: "2010-01-01"    # ASIC short data availability
+  xa_ted_spread:
+    start_date: "2005-01-03"
+    end_date:   "2022-01-21"    # FRED discontinued this series
+
+# ── Feature selection gates (applied to TRAIN SPLIT ONLY) ─────
+selection:
+  max_missingness: 0.50    # drop feature if >50% missing in train
+  min_variance:    1.0e-8  # drop feature if near-zero variance in train
+  # Output written to: data/registry/features_locked.json
+  # Schema hash stored in: data/registry/schema_hash.txt

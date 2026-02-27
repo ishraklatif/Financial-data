@@ -1,0 +1,264 @@
+# ============================================================
+# DATA CONFIGURATION
+# Single source of truth for all source paths, tickers,
+# date ranges, and fetch parameters.
+# ============================================================
+
+data:
+  start_date: "2005-01-03"
+  end_date: null          # null = use today's date at runtime
+
+# ── Raw storage paths ────────────────────────────────────────
+raw:
+  companies:        data/raw/companies
+  macro_indices:    data/raw/macro/indices
+  macro_vol:        data/raw/macro/volatility
+  fx:               data/raw/market/fx
+  commodities:      data/raw/market/commodities
+  credit:           data/raw/market/credit
+  sector:           data/raw/sector
+  fred:             data/raw/fred
+  rba_rates:        data/raw/rba/rates
+  rba_credit:       data/raw/rba/credit
+  abs_cpi:          data/raw/abs/cpi
+  abs_labour:       data/raw/abs/labour
+  abs_gdp:          data/raw/abs/gdp
+  abs_wpi:          data/raw/abs/wpi
+  abs_hpi:          data/raw/abs/hpi
+  news:             data/raw/sentiment/news
+  short_interest:   data/raw/sentiment/short_interest
+  calendar:         data/raw/calendar
+  corporate_actions: data/raw/corporate_actions
+
+# ── Processed storage paths ──────────────────────────────────
+processed:
+  companies:        data/processed/companies
+  macro:            data/processed/macro
+  market:           data/processed/market
+  sector:           data/processed/sector
+  fred:             data/processed/fred
+  rba:              data/processed/rba
+  abs:              data/processed/abs
+  sentiment:        data/processed/sentiment
+  calendar:         data/processed/calendar
+  corporate_actions: data/processed/corporate_actions
+
+# ── Output paths ─────────────────────────────────────────────
+output:
+  features:         data/features
+  master:           data/master
+  splits:           data/splits
+  registry:         data/registry
+  audit:            data/audit
+
+# ============================================================
+# ASX 50 UNIVERSE
+# ============================================================
+companies:
+  tickers:
+    # Financials
+    CBA.AX:  Financials
+    NAB.AX:  Financials
+    WBC.AX:  Financials
+    ANZ.AX:  Financials
+    MQG.AX:  Financials
+    SUN.AX:  Financials
+    IAG.AX:  Financials
+    AMP.AX:  Financials
+    ASX.AX:  Financials
+    CPU.AX:  Financials
+    CCP.AX:  Financials
+    # Materials
+    BHP.AX:  Materials
+    RIO.AX:  Materials
+    FMG.AX:  Materials
+    S32.AX:  Materials
+    AMC.AX:  Materials
+    JHX.AX:  Materials
+    ORI.AX:  Materials
+    NEM.AX:  Materials
+    # Energy
+    WDS.AX:  Energy
+    STO.AX:  Energy
+    ALD.AX:  Energy
+    # Utilities
+    ORG.AX:  Utilities
+    AGL.AX:  Utilities
+    APA.AX:  Utilities
+    # Industrials
+    TCL.AX:  Industrials
+    QAN.AX:  Industrials
+    BXB.AX:  Industrials
+    AIA.AX:  Industrials
+    AZJ.AX:  Industrials
+    # Real Estate
+    GPT.AX:  Real Estate
+    MGR.AX:  Real Estate
+    SCG.AX:  Real Estate
+    NSR.AX:  Real Estate
+    LLC.AX:  Real Estate
+    # Health Care
+    CSL.AX:  Health Care
+    RHC.AX:  Health Care
+    SHL.AX:  Health Care
+    # Consumer Discretionary
+    JBH.AX:  Consumer Discretionary
+    DMP.AX:  Consumer Discretionary
+    SUL.AX:  Consumer Discretionary
+    # Consumer Staples
+    WES.AX:  Consumer Staples
+    WOW.AX:  Consumer Staples
+    COL.AX:  Consumer Staples
+    MTS.AX:  Consumer Staples
+    # Communication Services
+    TLS.AX:  Communication Services
+    SEK.AX:  Communication Services
+    CAR.AX:  Communication Services
+    TPG.AX:  Communication Services
+    # Technology
+    WTC.AX:  Technology
+    XRO.AX:  Technology
+
+# ============================================================
+# MACRO INDICES (via yfinance)
+# ============================================================
+macro:
+  indices:
+    AXJO:   "^AXJO"       # ASX 200
+    GSPC:   "^GSPC"       # S&P 500
+    FTSE:   "^FTSE"       # FTSE 100
+    N225:   "^N225"       # Nikkei 225
+    HSI:    "^HSI"        # Hang Seng
+    SSE:    "000001.SS"   # Shanghai Composite
+    CSI300: "000300.SS"   # CSI 300
+  volatility:
+    VIX:    "^VIX"        # CBOE VIX
+    VVIX:   "^VVIX"       # VIX of VIX
+    MOVE:   "^MOVE"       # Bond market volatility
+
+# ============================================================
+# MARKET DATA (via yfinance)
+# ============================================================
+market:
+  fx:
+    AUDUSD: "AUDUSD=X"
+    AUDJPY: "AUDJPY=X"
+    AUDCNY: "AUDCNY=X"    # China exposure proxy
+    DXY:    "DX-Y.NYB"
+  commodities:
+    GOLD:   "GC=F"
+    OIL:    "BZ=F"        # Brent crude
+    COPPER: "HG=F"        # Copper futures (China demand proxy)
+    SILVER: "SI=F"
+    IRON:   "TIO=F"       # Iron ore — key for BHP/RIO/FMG
+    DBC:    "DBC"         # Broad commodity ETF
+  credit:
+    HY:     "BAMLH0A0HYM2"    # via FRED
+    IG:     "BAMLCC0A1AAATRIV" # via FRED
+
+# ============================================================
+# SECTOR ETFs (US — used for regime detection)
+# ============================================================
+sector:
+  tickers:
+    - XLF    # Financials
+    - XLK    # Technology
+    - XLI    # Industrials
+    - XLE    # Energy
+    - XLV    # Health Care
+    - XLU    # Utilities
+    - XLB    # Materials
+    - XLP    # Consumer Staples
+    - XLY    # Consumer Discretionary
+    - XLRE   # Real Estate
+    - XLC    # Communication Services
+    - GDX    # Gold miners — correlated with ASX materials
+
+# ============================================================
+# FRED (US macro)
+# ============================================================
+fred:
+  prefix: US
+  series:
+    # Inflation
+    CPI:        CPIAUCSL    # US CPI All Items
+    PCEPI:      PCEPI       # PCE Price Index (Fed's preferred measure)
+    # Labour
+    UNEMP:      UNRATE      # US unemployment rate
+    JOLTS:      JTSJOL      # Job openings — leading labour indicator
+    # Rates
+    FEDFUNDS:   FEDFUNDS    # Fed Funds rate
+    DGS2:       DGS2        # 2Y Treasury yield
+    DGS10:      DGS10       # 10Y Treasury yield
+    DGS30:      DGS30       # 30Y Treasury yield
+    DGS3MO:     DGS3MO      # 3M Treasury yield
+    # Yield curve spreads (computed, not fetched — but source series fetched)
+    # CURVE_10_2:  computed as DGS10 - DGS2
+    # CURVE_30_3M: computed as DGS30 - DGS3MO
+    # Growth
+    GDP:        GDPC1       # Real GDP
+    INDPRO:     INDPRO      # Industrial production index
+    PMI_MFG:    IPMAN       # Manufacturing PMI proxy
+    PMI_SERV:   SRVPRD      # Services PMI proxy
+    # Credit
+    HY_SPREAD:  BAMLH0A0HYM2      # HY OAS spread
+    IG_SPREAD:  BAMLCC0A1AAATRIV  # IG OAS spread
+    TED:        TEDRATE     # TED spread (ends 2022-01-21 — documented)
+    # Sentiment
+    UMICH:      UMCSENT     # U Michigan consumer sentiment
+
+# ============================================================
+# RBA (Australian macro)
+# ============================================================
+rba:
+  encoding: windows-1252   # CRITICAL — RBA CSVs are NOT UTF-8
+  tables:
+    f1: f1-data     # Interest rates — contains cash rate
+    f2: f2-data     # Capital market yields — contains 2Y and 10Y
+    f3: f3-data     # Credit aggregates
+  series:
+    CASH_RATE:  FIRMMCRTD       # Cash rate target (F1)
+    YIELD_10Y:  FCMYGBAG10D     # 10Y gov bond yield (F2)
+    YIELD_2Y:   FCMYGBAG2D      # 2Y gov bond yield (F2)
+    CREDIT_BUS: FSCREDTOTBUS    # Total business credit (F3)
+    CREDIT_HOU: FSCREDTOTHOUS   # Total housing credit (F3)
+
+# ============================================================
+# ABS (Australian Bureau of Statistics via SDMX API)
+# ============================================================
+abs:
+  base_url: "https://data.api.abs.gov.au/rest/data"
+  encoding: utf-8
+  # CRITICAL: save_parquet must call normalise_sdmx() before saving
+  # time_period column must be renamed to date before any downstream use
+  dataflows:
+    CPI:    CPI       # Consumer Price Index
+    LABOUR: LF        # Labour Force (unemployment)
+    GDP:    ANA_AGG   # National Accounts (GDP)
+    WPI:    WPI       # Wage Price Index
+    HPI:    RPPI      # Residential Property Price Index
+
+# ============================================================
+# ADDITIONAL SOURCES
+# ============================================================
+additional:
+  # Baltic Dry Index — global shipping, leads Australian commodity stocks
+  baltic_dry:
+    source: yfinance
+    ticker: "^BDI"
+    output: data/raw/market/commodities/BDI.parquet
+
+  # ASIC short interest — published weekly, ASX-specific signal
+  asic_short:
+    source: asic_website
+    url: "https://asic.gov.au/regulatory-resources/markets/short-selling/short-position-reports-table/"
+    output: data/raw/sentiment/short_interest/
+    frequency: weekly
+    note: "Manual download or scraper required — no public API"
+
+  # Earnings and ex-dividend calendar
+  # Prevents dividend-driven price drops from corrupting return targets
+  corporate_actions:
+    source: yfinance_actions
+    output: data/raw/corporate_actions/
+    note: "Fetched via yf.Ticker(sym).actions — dividends and splits"
