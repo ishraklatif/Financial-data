@@ -242,11 +242,11 @@ abs:
 # ADDITIONAL SOURCES
 # ============================================================
 additional:
-  # Baltic Dry Index — global shipping, leads Australian commodity stocks
   baltic_dry:
-    source: yfinance
-    ticker: "^BDI"
-    output: data/raw/market/commodities/BDI.parquet
+    source: not_available_via_yfinance
+    note: "BDI not available via yfinance. Alternative: manually download from
+           https://www.investing.com/indices/baltic-dry-historical-data
+           or use OECD/World Bank API. Skipped for now."
 
   # ASIC short interest — published weekly, ASX-specific signal
   asic_short:
