@@ -236,6 +236,9 @@ def apply_split_ffill(
         df = combined[combined["_is_seed"] == False].drop(columns=["_is_seed"])
         df = df.reset_index(drop=True)
 
+        # Restore integer dtypes promoted to float64 by NaN concat
+        df = restore_dtypes(df, seed_df)
+
     else:
         # No seeding: just ffill within split per ticker
         df[ffill_cols] = (
@@ -289,6 +292,37 @@ def validate_column_consistency(splits: dict[str, pd.DataFrame]) -> None:
         log.error(f"  In train not test: {train_set - test_set}")
         sys.exit(1)
     log.info(f"  All splits have {len(cols['train'])} columns in identical order")
+
+
+def restore_dtypes(df: pd.DataFrame, ref_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Restore integer dtypes that were promoted to float64 by the boundary-seeding
+    step (pandas upcasts int columns when NaN seed rows are concatenated).
+
+    Only restores columns where:
+      - ref_df dtype is integer (int32, int64, etc.)
+      - the column has no NaN values in df (safe to downcast)
+
+    This is applied to val and test after seed rows are removed.
+    """
+    for col in df.columns:
+        if col not in ref_df.columns:
+            continue
+        ref_dtype = ref_df[col].dtype
+        cur_dtype = df[col].dtype
+        if ref_dtype == cur_dtype:
+            continue
+        # Only attempt restore for integer targets
+        if not pd.api.types.is_integer_dtype(ref_dtype):
+            continue
+        # Only safe if no NaN remaining
+        if df[col].isna().any():
+            continue
+        try:
+            df[col] = df[col].astype(ref_dtype)
+        except (ValueError, OverflowError):
+            pass  # leave as-is if conversion fails
+    return df
 
 
 def reorder_columns(df: pd.DataFrame) -> pd.DataFrame:
