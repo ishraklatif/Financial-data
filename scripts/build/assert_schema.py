@@ -214,7 +214,7 @@ def assert_split(
 
         # Check monotonicity per ticker
         non_mono = 0
-        for ticker, grp in df.groupby("ticker"):
+        for ticker, grp in df.groupby("ticker", observed=True):
             if not grp["date"].is_monotonic_increasing:
                 non_mono += 1
         if non_mono > 0:
