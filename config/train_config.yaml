@@ -1,0 +1,99 @@
+# config/train_config.yaml
+# ============================================================
+# StockPred — Phase 4 Training Configuration
+# ============================================================
+data:
+  features_dir:   "data/features"
+  scalers_dir:    "config/scalers"
+  locked_config:  "config/features_locked.json"
+  train_path:     "data/features/panel_train_scaled.parquet"
+  val_path:       "data/features/panel_val_scaled.parquet"
+  test_path:      "data/features/panel_test_scaled.parquet"
+  target_reg:     "y_ret_21d"
+  target_cls:     "y_dir_21d"
+
+sequence:
+  lookback:   126
+  horizon:    1
+
+training:
+  seed:            42
+  val_metric:      "ic"
+  early_stopping:  50
+  max_epochs:      200
+  checkpoint_dir:  "checkpoints"
+  drive_checkpoint_dir: null
+
+loss:
+  reg_weight:   0.6   # regression focus — 0.2/0.8 caused cls collapse in DLinear
+  cls_weight:   0.4
+
+evaluation:
+  top_k_pct:         0.20
+  transaction_cost:  0.0010
+
+model_configs:
+  lightgbm:
+    name: "lightgbm"
+    reg:
+      num_leaves:            15
+      max_depth:             -1
+      learning_rate:         0.01
+      n_estimators:          3000
+      feature_fraction:      0.6
+      bagging_fraction:      0.7
+      bagging_freq:          5
+      min_child_samples:     300
+      reg_alpha:             0.0
+      reg_lambda:            10.0
+      early_stopping_rounds: 300
+    cls:
+      num_leaves:            63
+      max_depth:             -1
+      learning_rate:         0.01
+      n_estimators:          3000
+      feature_fraction:      0.6
+      bagging_fraction:      0.7
+      bagging_freq:          5
+      min_child_samples:     100
+      reg_alpha:             0.0
+      reg_lambda:            1.0
+      early_stopping_rounds: 300
+
+  dlinear:
+    name: "dlinear"
+    batch_size:       128
+    learning_rate:    0.0003
+    weight_decay:     1.0e-4
+    max_epochs:       150
+    individual:       false
+    moving_avg:       25
+    dropout:          0.3
+    hidden_dim:       64
+
+  ft_transformer:
+    name: "ft_transformer"
+    batch_size:        128       # reduced from 1024 — T4 OOMs above this
+    learning_rate:     0.0001   # best from 5-epoch probe
+    weight_decay:      1.0e-4
+    max_epochs:        100
+    warmup_epochs:     3        # linear warmup before cosine decay
+    d_token:           96       # reduced from 192 — best from probe
+    n_blocks:          2        # reduced from 3 — 3 blocks OOM on T4
+    attention_heads:   6        # must divide d_token (96 / 6 = 16)
+    ffn_factor:        1.333
+    attention_dropout: 0.2
+    ffn_dropout:       0.1
+    residual_dropout:  0.0
+
+  tft:
+    name: "tft"
+    batch_size:       256
+    learning_rate:    0.001
+    weight_decay:     1.0e-4
+    gradient_clip:    0.1
+    max_epochs:       100
+    hidden_size:      128
+    lstm_layers:      2
+    attention_heads:  4
+    dropout:          0.1

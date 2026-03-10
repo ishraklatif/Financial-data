@@ -429,6 +429,12 @@ def apply_to_split(split_name: str) -> None:
                  f"p75={vals.quantile(0.75):>+.4f}")
 
     # ── Save ──────────────────────────────────────────────────────────────
+    locked = load_locked()
+    keep_cols = ["date", "ticker", "y_ret_21d", "y_dir_21d"] + locked["features"]
+    keep_cols = [c for c in keep_cols if c in df_scaled.columns]
+    df_scaled = df_scaled[keep_cols]
+    log.info(f"  Output shape: {df_scaled.shape}  (locked features only)")
+
     out_path = SCALED_PATHS[split_name]
     df_scaled.to_parquet(out_path, index=False, engine="pyarrow", compression="snappy")
     size_mb = out_path.stat().st_size / 1e6
