@@ -50,9 +50,32 @@ output:
   splits:           data/splits
   registry:         data/registry
   audit:            data/audit
+  # ASX 200 expansion
+  features_asx200:  data/features/asx200
+  scaler_asx200:    config/scaler_asx200.pkl
+
+# ── Feature config paths ─────────────────────────────────────
+# Original ASX 50 model (Phase 4 — locked)
+features:
+  asx50:
+    locked_path:    config/features_locked.json
+    train_scaled:   data/features/panel_train_scaled.parquet
+    val_scaled:     data/features/panel_val_scaled.parquet
+    test_scaled:    data/features/panel_test_scaled.parquet
+
+  # ASX 200 expansion (new)
+  asx200:
+    locked_path:    config/features_asx200_locked.json
+    scaler_path:    config/scaler_asx200.pkl
+    train_scaled:   data/features/panel_asx200_train_scaled.parquet
+    val_scaled:     data/features/panel_asx200_val_scaled.parquet
+    test_scaled:    data/features/panel_asx200_test_scaled.parquet
+    raw:            data/features/panel_asx200_raw.parquet
 
 # ============================================================
-# ASX 50 UNIVERSE
+# ASX 50 UNIVERSE  (original — kept for backward compatibility)
+# The ASX 200 universe is defined in fetch_companies_asx200.py
+# as a hardcoded dict to avoid this file growing to ~200 lines.
 # ============================================================
 companies:
   tickers:
